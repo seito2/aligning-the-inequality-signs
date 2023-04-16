@@ -1,25 +1,23 @@
 import type { Rule } from "eslint";
-import type { BinaryExpression, Expression, Identifier } from "estree";
+import type { BinaryExpression } from "estree";
+import { generate } from "astring";
 
-const isIdentifier = (node: Expression): node is Identifier => node.type === "Identifier";
-
-const replaceLeftAndRight = (node: BinaryExpression) => {
+const replaceLeftAndRight = (node: BinaryExpression): string | null => {
   const { left, right } = node;
 
-  if (!isIdentifier(left) || !isIdentifier(right)) {
-    return null;
-  }
+  const leftValue = generate(left);
+  const rightValue = generate(right);
 
   if (node.operator === ">") {
-    return `${right.name} < ${left.name}`;
+    return `${rightValue} < ${leftValue}`;
   } else if (node.operator === ">=") {
-    return `${right.name} <= ${left.name}`;
+    return `${rightValue} <= ${leftValue}`;
   }
 
   return null;
 };
 
-const rule = {
+const aligningInequalitySigns = {
   meta: {
     type: "suggestion",
     docs: { description: "Aligning inequality signs" },
@@ -50,4 +48,4 @@ const rule = {
   },
 } satisfies Rule.RuleModule;
 
-module.exports = rule;
+exports.aligningInequalitySigns = aligningInequalitySigns;
